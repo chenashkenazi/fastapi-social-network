@@ -1,9 +1,10 @@
 import psycopg
+import uvicorn
 from fastapi import FastAPI, Depends
 from app import models
 from sqlalchemy.orm import Session
 from .database import engine, get_db
-from app.routers import post, user
+from app.routers import post, user, auth
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -30,6 +31,7 @@ def db_connect_and_execute(query: str, fetch_option: int):
 
 app.include_router(post.router)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 
 @app.get("/")
@@ -41,3 +43,7 @@ def root():
 def test_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts
+
+
+# if __name__ == '__main__':
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
