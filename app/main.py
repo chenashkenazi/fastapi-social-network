@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI, Depends
 from app import models
 from sqlalchemy.orm import Session
-from .database import engine, get_db
+from app.database import engine, get_db
 from app.routers import post, user, auth
 
 
@@ -47,3 +47,5 @@ def test_posts(db: Session = Depends(get_db)):
 
 # if __name__ == '__main__':
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# uvicorn app.main:app --reload
