@@ -34,18 +34,7 @@ app.include_router(user.router)
 app.include_router(auth.router)
 
 
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/sqlalchemy")
-def test_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return posts
-
-
-# if __name__ == '__main__':
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == '__main__':
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 # uvicorn app.main:app --reload

@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[Post])
-def get_posts(db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
+def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     # query = "SELECT * FROM posts;"
     # posts = db_connect_and_execute(query=query, fetch_option=2)
     posts = db.query(models.Post).all()
@@ -21,11 +21,12 @@ def get_posts(db: Session = Depends(get_db), get_current_user: int = Depends(oau
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Post)
-def create_posts(post: PostCreate, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
+def create_posts(post: PostCreate, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     # query = """INSERT INTO posts (title, content, published) VALUES ('{post_title}', '{post_content}', '{post_published}') RETURNING *;""".format(
     #     post_title=post.title, post_content=post.content, post_published=post.published)
     # new_post = db_connect_and_execute(query=query, fetch_option=1)
-    new_post = models.Post(**post.dict())
+
+    new_post = models.Post(user_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)  # retrieve the new post and save it to variable new_post
@@ -33,7 +34,7 @@ def create_posts(post: PostCreate, db: Session = Depends(get_db), get_current_us
 
 
 @router.get("/{post_id}", response_model=Post)
-def get_post(post_id: int, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
+def get_post(post_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     # query = """SELECT * FROM posts WHERE id = {post_id};""".format(post_id=post_id)
     # post = db_connect_and_execute(query=query, fetch_option=1)
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
@@ -44,7 +45,7 @@ def get_post(post_id: int, db: Session = Depends(get_db), get_current_user: int 
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(post_id: int, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
+def delete_post(post_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     # query = """DELETE FROM posts WHERE id = {post_id} RETURNING * """.format(post_id=post_id)
     # deleted_post = db_connect_and_execute(query=query, fetch_option=1)
     post = db.query(models.Post).filter(models.Post.id == post_id)
@@ -59,7 +60,7 @@ def delete_post(post_id: int, db: Session = Depends(get_db), get_current_user: i
 
 
 @router.put("/{post_id}", response_model=Post)
-def update_post(post_id: int, updated_post: PostCreate, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
+def update_post(post_id: int, updated_post: PostCreate, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     # query = """UPDATE posts SET title = '{post_title}', content = '{post_content}', published = '{post_published}' WHERE id = {post_id} RETURNING * """.format(
     #     post_title=post.title, post_content=post.content, post_published=post.published, post_id=str(post_id))
     # updated_post = db_connect_and_execute(query=query, fetch_option=1)
